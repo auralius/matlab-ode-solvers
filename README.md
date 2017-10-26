@@ -8,3 +8,12 @@ y_dot = f(t,y)
 The solver then provides the solution of such an ODE in form of
 
 y = f(t,y)
+
+Implemented solvers so far:   
+- Euler
+- 4th order Runge-Kutta  
+- Runge-Kutta 3/8    
+- Dormand-Prince   
+
+
+manurunga@yandex.com   

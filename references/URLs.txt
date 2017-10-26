@@ -1,0 +1,5 @@
+http://www.aip.de/groups/soe/local/numres/bookcpdf/c16-1.pdf
+
+https://doi.org/10.1016/0771-050X(80)90013-3
+
+https://en.wikipedia.org/wiki/Dormand%E2%80%93Prince_method
