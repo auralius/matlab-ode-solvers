@@ -17,3 +17,8 @@ Implemented solvers so far:
 
 
 manurunga@yandex.com   
+
+![Example 1](https://github.com/auralius/matlab-ode-solvers/blob/master/ex1.png)  
+![Example 2](https://github.com/auralius/matlab-ode-solvers/blob/master/ex2.png)  
+![Example 3](https://github.com/auralius/matlab-ode-solvers/blob/master/ex3.png)  
+![Example 4](https://github.com/auralius/matlab-ode-solvers/blob/master/ex4.png)  
