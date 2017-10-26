@@ -60,7 +60,7 @@ title('Van der Pol, $\mu = 100$', 'interpreter', 'latex');
 [tb, yb] = rk4(@myode4, -1, 0, 10, 0.001);
 [tc, yc] = rk38(@myode4, -1, 0, 10, 0.001);
 [td, yd] = heun(@myode4, -1, 0, 10, 0.001);
-[td, yd] = dormandprince(@myode4, -1, 0, 10, 0.001);
+[te, ye] = dormandprince(@myode4, -1, 0, 10, 0.001);
 figure
 hold on
 plot(ta, ya, 'b');
