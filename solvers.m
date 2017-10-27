@@ -1,4 +1,4 @@
-%% Collection of solvers with fixed steps 
+%% Collection of solvers
 % For an ODE: $\dot{y}(t,y) = f(t,y)$
 % 
 
