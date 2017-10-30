@@ -14,6 +14,7 @@ Implemented solvers so far:
 - 4th order Runge-Kutta  
 - Runge-Kutta 3/8    
 - Dormand-Prince   
+- Runge-Kutta-Fehlberg method (RKF45)
 
 
 manurunga@yandex.com   
