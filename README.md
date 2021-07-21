@@ -16,7 +16,9 @@ Implemented solvers so far:
 - Dormand-Prince   
 - Runge-Kutta-Fehlberg (RKF45)
 
+Check the the documentation in the /docs folder or here:  
 
+https://auralius.github.io/matlab-ode-solvers/
+
+Contact:  
 manurunga@yandex.com   
-
-Check the the documentation in the /docs folder.
