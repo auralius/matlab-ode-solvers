@@ -1,12 +1,10 @@
-%% Collection of solvers
-% For an ODE: $\dot{y}(t,y) = f(t,y)$
+%% Collection of Solvers
+% Author: Auralius Manurung, ME, Universitas Pertamina,
+% auralius.manurung@ieee.org
 %
-% The solution takes a form of $y(t)=\dots$
+% For an ODE: $\dot{y}(t,y) = f(t,y)$ The solution takes a form of 
+% $y(t)=\dots$
 % 
-
-clc
-close all
-clear all
 
 %% Test 1 : A very stiff system
 disp('Running Test 1 ...')
@@ -104,11 +102,12 @@ legend('Forward Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', ...
        'RKF45', 'Backward Euler', 'Location', 'Best');
 title('$\dot{y} = y * sin(t)$', 'interpreter', 'latex');
 
-%% Test 5 : A special test to campare Forward Euler and Backward Euler
-%  The test is taken from https://web.mit.edu/10.001/Web/Course_Notes/Differential_Equations_Notes/node3.html
+%% Test 5 : A special test to compare Forward Euler and Backward Euler
+% The test is taken from
+% <https://web.mit.edu/10.001/Web/Course_Notes/Differential_Equations_Notes/node3.html>
+% Forward Euler becomes unstable when $h>0.2$. Backward 
+% Euler is unconditionally stable.
 %
-%  Forward Euler becomes unstable  when $h>0.2$. Backward Euler is
-%  unconditionally stable.
 
 disp('Running Test 5 ...')
 
@@ -247,7 +246,8 @@ end
 end
 
 %% Dormand-prince method
-%  This is an adaptive method with variable time step
+% This is an adaptive method with variable time step
+%
 function [t, y] = dormandprince(odefun, ...   % The ODE function
                                 y0, ...       % Initial states
                                 ts, ...       % Start time
@@ -286,8 +286,9 @@ while t < tf
 end
 end
 
-%% The Runge-Kutta-Fehlberg method (RKF45)
+%% Runge-Kutta-Fehlberg method (RKF45)
 % This is an adaptive method with variable time step.
+%
 function [t, y] = rkf45(odefun, ...   % The ODE function
                         y0, ...       % Initial states
                         ts, ...       % Start time
@@ -325,12 +326,21 @@ end
 end
 
 
-%% The Backward-Euler method
-function [t, y] = beuler(odefun, ...  % The ODE function
-                         y0, ...      % Initial states
-                         ts, ...      % Start time
-                         tf, ...      % End time
-                         h)           % Step time
+%% Backward Euler method
+function [t, y] = beuler(odefun, ... % The ODE function
+                         y0, ...     % Initial states
+                         ts, ...     % Start time
+                         tf, ...     % End time
+                         h, ...      % Step time
+                         TOL, ...    % Tollerance for Newton's method
+                         MAX_ITER)   % Max iterations for Newton's method
+
+if nargin < 6
+    TOL = 0.0001;
+    MAX_ITER = 1000;
+elseif nargin < 7
+    MAX_ITER = 1000;
+end
 
 t = ts:h:tf;
 y = zeros(length(y0),length(t));
@@ -341,30 +351,33 @@ y(:,1) = y0;
 for k = 1 : length(t)-1
     y1 = y(:,k);        
     F = build_F(odefun, t(k), y(:,k), y1, h);
-    y2 = y1 - inv(I-h*Jacobian(odefun, t(k), y1)) * F; 
+    y2 = y1 - (I-h*Jacobian(odefun, t(k), y1)) \ F; 
 
-    while (norm(y2-y1) > 0.0001)
+    n_iterations = 1;
+    while (norm(y2-y1) > TOL && n_iterations < MAX_ITER)
         y1 = y2;
         F = build_F(odefun, t(k), y(:,k), y1, h);
-        y2 = y1 - inv(I-h*Jacobian(odefun, t(k), y1)) * F; 
+        y2 = y1 - (I-h*Jacobian(odefun, t(k), y1)) \ F; 
+        n_iterations = n_iterations + 1;
     end
 
     y(:,k+1) = y2;
 end
 end
 
-% build the equation: F = 0
+% -------------------------------------------------------------------------
+% Build the equation: F = 0
+% -------------------------------------------------------------------------
 function F = build_F(f, t, y1, y2, h)
-
 F = y2 - y1 - h*f(t, y2);
-
 end
 
-
+% -------------------------------------------------------------------------
 % Calculate Jacobian of function f at given x
 % Complex-Step Derivative Approximation (CSDA) Method
+% See: https://github.com/auralius/numerical-jacobian
+% -------------------------------------------------------------------------
 function DF = Jacobian(f, t, x, epsilon)
-
 if nargin < 4
     epsilon = 1e-5; 
 end
@@ -379,7 +392,6 @@ for k = 1 : nx
     xplus(k) =  x(k) + 1i*epsilon;
     DF(:, k) = imag(f(t, xplus))  .* epsilon_inv;
 end
-
 end
 % ------------------------------------------------------------------------    
 
