@@ -10,11 +10,12 @@ The solver then provides the solution of such an ODE in form of
 y = f(t,y)
 
 Implemented solvers so far:   
-- Euler
+- Forward (Explicit) Euler
 - 4th order Runge-Kutta  
 - Runge-Kutta 3/8    
 - Dormand-Prince   
-- Runge-Kutta-Fehlberg (RKF45)
+- Runge-Kutta-Fehlberg (RKF45)  
+- Backward (Implicit) Euler  
 
 Check the the documentation in the /docs folder or here:  
 

@@ -4,3 +4,5 @@ https://maths.cnam.fr/IMG/pdf/RungeKuttaFehlbergProof.pdf
 
 https://en.wikipedia.org/wiki/Dormand%E2%80%93Prince_method
 
+https://www.mathstat.dal.ca/~iron/math3210/backwardeuler.pdf
+

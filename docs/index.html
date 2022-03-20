@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Collection of solvers</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-07-21"><meta name="DC.source" content="solvers.m"><style type="text/css">
+      --><title>solvers</title><meta name="generator" content="MATLAB 9.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-03-20"><meta name="DC.source" content="solvers.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,17 +67,18 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Collection of solvers</h1><!--introduction--><p>For an ODE: <img src="solvers_eq00928680689890931089.png" alt="$\dot{y}(t,y) = f(t,y)$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Prepare the environment</a></li><li><a href="#2">------ Test 1 ------</a></li><li><a href="#3">------ Test 2 ------</a></li><li><a href="#4">------ Test 3 ------</a></li><li><a href="#5">------ Test 4 ------</a></li><li><a href="#6">ODEs to be solved</a></li><li><a href="#7">Solver implementations</a></li><li><a href="#8">Euler method</a></li><li><a href="#9">Fourth oder Runge-Kutta</a></li><li><a href="#10">Runge-Kutta 3/8 method</a></li><li><a href="#11">Heun's method</a></li><li><a href="#12">Dormand-prince method, this is an adaptive method with variable time step.</a></li><li><a href="#13">The Runge-Kutta-Fehlberg method (RKF45), this is an adaptive method with variable time step.</a></li></ul></div><h2 id="1">Prepare the environment</h2><pre class="codeinput">clc
-clear
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Collection of solvers</a></li><li><a href="#2">Test 1 : A very stiff system</a></li><li><a href="#3">Test 2 : Lorenz dynamics</a></li><li><a href="#4">Test 3 : Van der Pol oscillator</a></li><li><a href="#5">Test 4 : A simple sine wave</a></li><li><a href="#6">Test 5 : A special test to campare Forward Euler and Backward Euler</a></li><li><a href="#7">Some ODES that we can use to test the solvers</a></li><li><a href="#8">Forward Euler method</a></li><li><a href="#9">Fourth oder Runge-Kutta</a></li><li><a href="#10">Runge-Kutta 3/8 method</a></li><li><a href="#11">Heun's method</a></li><li><a href="#12">Dormand-prince method</a></li><li><a href="#13">The Runge-Kutta-Fehlberg method (RKF45)</a></li><li><a href="#14">The Backward-Euler method</a></li></ul></div><h2 id="1">Collection of solvers</h2><p>For an ODE: <img src="solvers_eq05515617522012194846.png" alt="$\dot{y}(t,y) = f(t,y)$"></p><p>The solution takes a form of <img src="solvers_eq03379614566667396113.png" alt="$y(t)=\dots$"></p><pre class="codeinput">clc
 close <span class="string">all</span>
-</pre><h2 id="2">------ Test 1 ------</h2><p>Simulate a very stiff system</p><pre class="codeinput">disp(<span class="string">'Running Test 1 ...'</span>)
+clear <span class="string">all</span>
+</pre><h2 id="2">Test 1 : A very stiff system</h2><pre class="codeinput">disp(<span class="string">'Running Test 1 ...'</span>)
 
-[ta, ya] = euler(@myode1, 1, 0, 0.02, 0.001);
+[ta, ya] = feuler(@myode1, 1, 0, 0.02, 0.001);
 [tb, yb] = rk4(@myode1, 1, 0, 0.02, 0.001);
 [tc, yc] = rk38(@myode1, 1, 0, 0.02, 0.001);
 [td, yd] = heun(@myode1, 1, 0, 0.02, 0.001);
 [te, ye] = dormandprince(@myode1, 1, 0, 0.02, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode1, 1, 0, 0.02, 0.001, 1e-9);
+[tg, yg] = beuler(@myode1, 1, 0, 0.02, 0.001);
 
 figure
 hold <span class="string">on</span>
@@ -87,17 +88,20 @@ plot(tc, yc, <span class="string">'m'</span>)
 plot(td, yd, <span class="string">'k'</span>)
 plot(te, ye, <span class="string">'g'</span>)
 plot(tf, yf, <span class="string">'c'</span>)
-legend(<span class="string">'Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="string">'RKF45'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
+plot(tg, yg, <span class="string">'y'</span>)
+legend(<span class="string">'Forward Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="keyword">...</span>
+       <span class="string">'RKF45'</span>, <span class="string">'Backward Euler'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
 title(<span class="string">'Stiff ODE, $\dot{y} = -1000y$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
 </pre><pre class="codeoutput">Running Test 1 ...
-</pre><img vspace="5" hspace="5" src="solvers_01.png" alt=""> <h2 id="3">------ Test 2 ------</h2><p>Lorenz dynamics</p><pre class="codeinput">disp(<span class="string">'Running Test 2 ...'</span>)
+</pre><img vspace="5" hspace="5" src="solvers_01.png" alt=""> <h2 id="3">Test 2 : Lorenz dynamics</h2><pre class="codeinput">disp(<span class="string">'Running Test 2 ...'</span>)
 
-[ta, ya] = euler(@myode2, [1 1 1]', 0, 20, 0.001);
+[ta, ya] = feuler(@myode2, [1 1 1]', 0, 20, 0.001);
 [tb, yb] = rk4(@myode2, [1 1 1]', 0, 20, 0.001);
 [tc, yc] = rk38(@myode2, [1 1 1]', 0, 20, 0.001);
 [td, yd] = heun(@myode2, [1 1 1]', 0, 20, 0.001);
 [te, ye] = dormandprince(@myode2, [1 1 1], 0, 20, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode2, [1 1 1], 0, 20, 0.001,  1e-9);
+[tg, yg] = beuler(@myode2, [1 1 1]', 0, 20, 0.001);
 
 figure
 hold <span class="string">on</span>
@@ -107,17 +111,20 @@ plot3(yc(1,:), yc(2,:), yc(3,:), <span class="string">'m'</span>);
 plot3(yd(1,:), yd(2,:), yd(3,:), <span class="string">'k'</span>);
 plot3(ye(1,:), ye(2,:), ye(3,:), <span class="string">'g'</span>);
 plot3(yf(1,:), yf(2,:), yf(3,:), <span class="string">'c'</span>);
-legend(<span class="string">'Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="string">'RKF45'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
+plot3(yg(1,:), yg(2,:), yg(3,:), <span class="string">'y'</span>);
+legend(<span class="string">'Forward Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="keyword">...</span>
+       <span class="string">'RKF45'</span>, <span class="string">'Backward Euler'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
 title(<span class="string">'Lorenz, $\sigma = 10, \beta = 8/3, \rho = 28$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
 </pre><pre class="codeoutput">Running Test 2 ...
-</pre><img vspace="5" hspace="5" src="solvers_02.png" alt=""> <h2 id="4">------ Test 3 ------</h2><p>Van der Pol oscillator</p><pre class="codeinput">disp(<span class="string">'Running Test 3 ...'</span>)
+</pre><img vspace="5" hspace="5" src="solvers_02.png" alt=""> <h2 id="4">Test 3 : Van der Pol oscillator</h2><pre class="codeinput">disp(<span class="string">'Running Test 3 ...'</span>)
 
-[ta, ya] = euler(@myode3, [2 0]', 0, 1000, 0.001);
+[ta, ya] = feuler(@myode3, [2 0]', 0, 1000, 0.001);
 [tb, yb] = rk4(@myode3, [2 0]', 0, 1000, 0.001);
 [tc, yc] = rk38(@myode3, [2 0]', 0, 1000, 0.001);
 [td, yd] = heun(@myode3, [2 0]', 0, 1000, 0.001);
 [te, ye] = dormandprince(@myode3, [2 0]', 0, 1000, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode3, [2 0]', 0, 1000, 0.001,  1e-9);
+[tg, yg] = beuler(@myode3, [2 0]', 0, 1000, 0.001);
 
 figure
 hold <span class="string">on</span>
@@ -127,17 +134,21 @@ plot(yc(1,:), yc(2,:), <span class="string">'m'</span>);
 plot(yd(1,:), yd(2,:), <span class="string">'k'</span>);
 plot(ye(1,:), ye(2,:), <span class="string">'g'</span>);
 plot(yf(1,:), yf(2,:), <span class="string">'c'</span>);
-legend(<span class="string">'Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="string">'RKF45'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
+plot(yg(1,:), yg(2,:), <span class="string">'y'</span>);
+legend(<span class="string">'Forward Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="keyword">...</span>
+       <span class="string">'RKF45'</span>, <span class="string">'Backward Euler'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
 title(<span class="string">'Van der Pol, $\mu = 100$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
 </pre><pre class="codeoutput">Running Test 3 ...
-</pre><img vspace="5" hspace="5" src="solvers_03.png" alt=""> <h2 id="5">------ Test 4 ------</h2><p>A simple sine wave</p><pre class="codeinput">disp(<span class="string">'Running Test 4 ...'</span>)
+</pre><img vspace="5" hspace="5" src="solvers_03.png" alt=""> <h2 id="5">Test 4 : A simple sine wave</h2><pre class="codeinput">disp(<span class="string">'Running Test 4 ...'</span>)
 
-[ta, ya] = euler(@myode4, -1, 0, 10, 0.001);
+[ta, ya] = feuler(@myode4, -1, 0, 10, 0.001);
 [tb, yb] = rk4(@myode4, -1, 0, 10, 0.001);
 [tc, yc] = rk38(@myode4, -1, 0, 10, 0.001);
 [td, yd] = heun(@myode4, -1, 0, 10, 0.001);
 [te, ye] = dormandprince(@myode4, -1, 0, 10, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode4, -1, 0, 10, 0.001, 1e-9);
+[tg, yg] = beuler(@myode4, -1, 0, 10, 0.001);
+
 figure
 hold <span class="string">on</span>
 plot(ta, ya, <span class="string">'b'</span>);
@@ -146,15 +157,42 @@ plot(tc, yc, <span class="string">'m'</span>);
 plot(td, yd, <span class="string">'k'</span>);
 plot(te, ye, <span class="string">'g'</span>);
 plot(tf, yf, <span class="string">'c'</span>);
-legend(<span class="string">'Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="string">'RKF45'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
+plot(tg, yg, <span class="string">'y'</span>)
+legend(<span class="string">'Forward Euler'</span>, <span class="string">'RK4'</span>, <span class="string">'RK3/8'</span>, <span class="string">'Heun'</span>, <span class="string">'Dormand-Prince'</span>, <span class="keyword">...</span>
+       <span class="string">'RKF45'</span>, <span class="string">'Backward Euler'</span>, <span class="string">'Location'</span>, <span class="string">'Best'</span>);
 title(<span class="string">'$\dot{y} = y * sin(t)$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>);
 </pre><pre class="codeoutput">Running Test 4 ...
-</pre><h2 id="6">ODEs to be solved</h2><pre class="codeinput"><span class="comment">% A very stiff ODE</span>
+</pre><img vspace="5" hspace="5" src="solvers_04.png" alt=""> <h2 id="6">Test 5 : A special test to campare Forward Euler and Backward Euler</h2><pre>The test is taken from https://web.mit.edu/10.001/Web/Course_Notes/Differential_Equations_Notes/node3.html</pre><pre>Forward Euler becomes unstable  when $h&gt;0.2$. Backward Euler is
+unconditionally stable.</pre><pre class="codeinput">disp(<span class="string">'Running Test 5 ...'</span>)
+
+h = [0.2 0.1 0.05 0.01 0.001];
+
+figure
+hold <span class="string">on</span>
+<span class="keyword">for</span> k = 1 : length(h)
+    [t, y] = feuler(@myode5, 1, 0, 3, h(k));
+    plot(t, y)
+<span class="keyword">end</span>
+legend(num2str(h), <span class="string">'Location'</span>, <span class="string">'best'</span>);
+title (<span class="string">'Forward Euler for $\dot{y} = -10y$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>)
+
+figure
+hold <span class="string">on</span>
+<span class="keyword">for</span> k = 1 : length(h)
+    [t, y] = beuler(@myode5, 1, 0, 3, h(k));
+    plot(t, y)
+<span class="keyword">end</span>
+legend(num2str(h), <span class="string">'Location'</span>, <span class="string">'best'</span>);
+title (<span class="string">'Backward Euler for $\dot{y} = -10y$'</span>, <span class="string">'interpreter'</span>, <span class="string">'latex'</span>)
+</pre><pre class="codeoutput">Running Test 5 ...
+</pre><img vspace="5" hspace="5" src="solvers_05.png" alt=""> <img vspace="5" hspace="5" src="solvers_06.png" alt=""> 
+
+</pre><h2 id="7">Some ODES that we can use to test the solvers</h2><pre class="codeinput"><span class="comment">% ------ A very stiff ODE ------</span>
 <span class="keyword">function</span> ydot = myode1(t,y)
 ydot = -1000*y;
 <span class="keyword">end</span>
 
-<span class="comment">% Lorenz dynamics</span>
+<span class="comment">% ------ Lorenz dynamics ------</span>
 <span class="keyword">function</span> ydot = myode2(t,y)
 sigma = 10;
 beta = 8/3;
@@ -164,21 +202,27 @@ ydot = [sigma * (y(2) - y(1));
     y(1) * y(2) - beta * y(3)];
 <span class="keyword">end</span>
 
-<span class="comment">% Van der Pol oscillator</span>
+<span class="comment">% ------ Van der Pol oscillator ------</span>
 <span class="keyword">function</span> ydot = myode3(t,y)
 Mu = 100;
 ydot = [y(2); Mu*(1-y(1)^2)*y(2)-y(1)];
 <span class="keyword">end</span>
 
-<span class="comment">% A simple sine wave</span>
+<span class="comment">% ------ A simple sine wave ------</span>
 <span class="keyword">function</span> ydot = myode4(t,y)
 ydot = y*sin(t);
 <span class="keyword">end</span>
-</pre><h2 id="7">Solver implementations</h2><h2 id="8">Euler method</h2><pre class="codeinput"><span class="keyword">function</span> [t, y] = euler(odefun, <span class="keyword">...</span><span class="comment">  % The ODE function</span>
-                        y0, <span class="keyword">...</span><span class="comment">      % Initial states</span>
-                        ts, <span class="keyword">...</span><span class="comment">      % Start time</span>
-                        tf, <span class="keyword">...</span><span class="comment">      % End time</span>
-                        h)           <span class="comment">% Step time</span>
+
+<span class="comment">% ------ An ODE wih a decaying solution ------</span>
+<span class="keyword">function</span> ydot = myode5(t,y)
+ydot = -10*y;
+<span class="keyword">end</span>
+<span class="comment">% --------------------------------------------</span>
+</pre><h2 id="8">Forward Euler method</h2><pre class="codeinput"><span class="keyword">function</span> [t, y] = feuler(odefun, <span class="keyword">...</span><span class="comment">  % The ODE function</span>
+                         y0, <span class="keyword">...</span><span class="comment">      % Initial states</span>
+                         ts, <span class="keyword">...</span><span class="comment">      % Start time</span>
+                         tf, <span class="keyword">...</span><span class="comment">      % End time</span>
+                         h)           <span class="comment">% Step time</span>
 t = ts:h:tf;
 y = zeros(length(y0),length(t));
 y(:,1) = y0;
@@ -187,7 +231,7 @@ y(:,1) = y0;
     y(:,k) = y(:,k-1)+ydot.*h;
 <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><h2 id="9">Fourth oder Runge-Kutta</h2><pre class="codeinput"><span class="keyword">function</span> [t, y] = rk4(odefun, <span class="keyword">...</span><span class="comment">  % The ODE function</span>
+<h2 id="9">Fourth oder Runge-Kutta</h2><pre class="codeinput"><span class="keyword">function</span> [t, y] = rk4(odefun, <span class="keyword">...</span><span class="comment">  % The ODE function</span>
                       y0, <span class="keyword">...</span><span class="comment">      % Initial states</span>
                       ts, <span class="keyword">...</span><span class="comment">      % Start time</span>
                       tf, <span class="keyword">...</span><span class="comment">      % End time</span>
@@ -245,7 +289,7 @@ y(:,1) = y0;
     y(:,k) = yn + 1 / 2 * k1 + 1 / 2 * k2;
 <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><h2 id="12">Dormand-prince method, this is an adaptive method with variable time step.</h2><pre class="codeinput"><span class="keyword">function</span> [t, y] = dormandprince(odefun, <span class="keyword">...</span><span class="comment">   % The ODE function</span>
+</pre><h2 id="12">Dormand-prince method</h2><pre>This is an adaptive method with variable time step</pre><pre class="codeinput"><span class="keyword">function</span> [t, y] = dormandprince(odefun, <span class="keyword">...</span><span class="comment">   % The ODE function</span>
                                 y0, <span class="keyword">...</span><span class="comment">       % Initial states</span>
                                 ts, <span class="keyword">...</span><span class="comment">       % Start time</span>
                                 tf, <span class="keyword">...</span><span class="comment">       % End time</span>
@@ -262,12 +306,17 @@ t = ts;
     k2 = h * odefun(tn+h/5, yn+k1/5);
     k3 = h * odefun(tn+h*3/10, yn+k1*3/40 + k2*9/40);
     k4 = h * odefun(tn+h*4/5, yn + k1*44/45 - k2*56/15 + k3*32/9);
-    k5 = h * odefun(tn+h*8/9, yn + k1*19372/6561 - k2*25360/2187 + k3*64448/6561 - k4*212/729);
-    k6 = h * odefun(tn+h, yn + k1*9017/3168 - k2*355/33 + k3*46732/5247 + k4*49/176 - k5*5103/18656);
-    k7 = h * odefun(tn+h, yn + k1*35/384 + k3*500/1113 + k4*125/192 - k5*2187/6784 + k6*11/84);
+    k5 = h * odefun(tn+h*8/9, yn + k1*19372/6561 - k2*25360/2187 + <span class="keyword">...</span>
+                    k3*64448/6561 - k4*212/729);
+    k6 = h * odefun(tn+h, yn + k1*9017/3168 - k2*355/33 + <span class="keyword">...</span>
+                    k3*46732/5247 + k4*49/176 - k5*5103/18656);
+    k7 = h * odefun(tn+h, yn + k1*35/384 + k3*500/1113 + k4*125/192 - <span class="keyword">...</span>
+                    k5*2187/6784 + k6*11/84);
 
-    Y = yn + 35/384*k1 + 500/1113*k3 + 125/192*k4 - 2187/6784*k5 + 11/84*k6;
-    Z = yn + 5179/57600*k1 + 7571/16695*k3 + 393/640*k4 - 92097/339200*k5 + 187/2100*k6 + 1/40*k7;
+    Y = yn + 35/384*k1 + 500/1113*k3 + 125/192*k4 - 2187/6784*k5 + <span class="keyword">...</span>
+        11/84*k6;
+    Z = yn + 5179/57600*k1 + 7571/16695*k3 + 393/640*k4 - <span class="keyword">...</span>
+        92097/339200*k5 + 187/2100*k6 + 1/40*k7;
 
     E = norm(Y-Z); <span class="comment">% local error estimation</span>
     h = 0.9 * h * (TOL/E)^(1/5);
@@ -277,7 +326,7 @@ t = ts;
     k = k + 1;
 <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><h2 id="13">The Runge-Kutta-Fehlberg method (RKF45), this is an adaptive method with variable time step.</h2><pre class="codeinput"><span class="keyword">function</span> [t, y] = rkf45(odefun, <span class="keyword">...</span><span class="comment">   % The ODE function</span>
+</pre><h2 id="13">The Runge-Kutta-Fehlberg method (RKF45)</h2><p>This is an adaptive method with variable time step.</p><pre class="codeinput"><span class="keyword">function</span> [t, y] = rkf45(odefun, <span class="keyword">...</span><span class="comment">   % The ODE function</span>
                         y0, <span class="keyword">...</span><span class="comment">       % Initial states</span>
                         ts, <span class="keyword">...</span><span class="comment">       % Start time</span>
                         tf, <span class="keyword">...</span><span class="comment">       % End time</span>
@@ -293,12 +342,16 @@ t = ts;
     k1 = h * odefun(tn, yn);
     k2 = h * odefun(tn+h/4, yn+k1/4);
     k3 = h * odefun(tn+h*3/8, yn+k1*3/32 + k2*9/32);
-    k4 = h * odefun(tn+h*12/13, yn + k1*1932/2197 - k2*7200/2197 + k3*7296/2197);
-    k5 = h * odefun(tn+h, yn + k1*439/216 - 8*k2 + k3*3680/513 - k4*845/4104);
-    k6 = h * odefun(tn+h/2, yn - k1*8/27 + k2*2 - k3*3544/2565 + k4*1859/4104 - k5*11/40);
+    k4 = h * odefun(tn+h*12/13, yn + k1*1932/2197 - k2*7200/2197 + <span class="keyword">...</span>
+                    k3*7296/2197);
+    k5 = h * odefun(tn+h, yn + k1*439/216 - 8*k2 + k3*3680/513 - <span class="keyword">...</span>
+                    k4*845/4104);
+    k6 = h * odefun(tn+h/2, yn - k1*8/27 + k2*2 - k3*3544/2565 + <span class="keyword">...</span>
+                    k4*1859/4104 - k5*11/40);
 
     Y = yn + 25/216*k1 + 1408/2565*k3 + 2197/4104*k4 - 1/5*k5;
-    Z = yn + 16/135*k1 + 6656/12825*k3 + 28561/56430*k4 - 9/50*k5 + 2/55*k6;
+    Z = yn + 16/135*k1 + 6656/12825*k3 + 28561/56430*k4 - 9/50*k5 + <span class="keyword">...</span>
+        2/55*k6;
 
     E = norm(Y-Z); <span class="comment">% local error estimation</span>
     h = 0.9 * h * (TOL/E)^(1/5);
@@ -308,27 +361,84 @@ t = ts;
     k = k + 1;
 <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+</pre><h2 id="14">The Backward-Euler method</h2><pre class="codeinput"><span class="keyword">function</span> [t, y] = beuler(odefun, <span class="keyword">...</span><span class="comment">  % The ODE function</span>
+                         y0, <span class="keyword">...</span><span class="comment">      % Initial states</span>
+                         ts, <span class="keyword">...</span><span class="comment">      % Start time</span>
+                         tf, <span class="keyword">...</span><span class="comment">      % End time</span>
+                         h)           <span class="comment">% Step time</span>
+
+t = ts:h:tf;
+y = zeros(length(y0),length(t));
+I = eye(length(y0));
+
+y(:,1) = y0;
+
+<span class="keyword">for</span> k = 1 : length(t)-1
+    y1 = y(:,k);
+    F = build_F(odefun, t(k), y(:,k), y1, h);
+    y2 = y1 - inv(I-h*Jacobian(odefun, t(k), y1)) * F;
+
+    <span class="keyword">while</span> (norm(y2-y1) &gt; 0.0001)
+        y1 = y2;
+        F = build_F(odefun, t(k), y(:,k), y1, h);
+        y2 = y1 - inv(I-h*Jacobian(odefun, t(k), y1)) * F;
+    <span class="keyword">end</span>
+
+    y(:,k+1) = y2;
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% build the equation: F = 0</span>
+<span class="keyword">function</span> F = build_F(f, t, y1, y2, h)
+
+F = y2 - y1 - h*f(t, y2);
+
+<span class="keyword">end</span>
+
+
+<span class="comment">% Calculate Jacobian of function f at given x</span>
+<span class="comment">% Complex-Step Derivative Approximation (CSDA) Method</span>
+<span class="keyword">function</span> DF = Jacobian(f, t, x, epsilon)
+
+<span class="keyword">if</span> nargin &lt; 4
+    epsilon = 1e-5;
+<span class="keyword">end</span>
+
+epsilon_inv = 1/epsilon;
+
+nx = length(x); <span class="comment">% Dimension of the input x;</span>
+
+<span class="comment">% Do perturbation</span>
+<span class="keyword">for</span> k = 1 : nx
+    xplus = x;
+    xplus(k) =  x(k) + 1i*epsilon;
+    DF(:, k) = imag(f(t, xplus))  .* epsilon_inv;
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+<span class="comment">% ------------------------------------------------------------------------</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Collection of solvers
 % For an ODE: $\dot{y}(t,y) = f(t,y)$
+%
+% The solution takes a form of $y(t)=\dots$
 % 
 
-%% Prepare the environment
 clc
-clear
 close all
+clear all
 
-%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Test 1 REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-% Simulate a very stiff system
+%% Test 1 : A very stiff system
 disp('Running Test 1 ...')
 
-[ta, ya] = euler(@myode1, 1, 0, 0.02, 0.001);
+[ta, ya] = feuler(@myode1, 1, 0, 0.02, 0.001);
 [tb, yb] = rk4(@myode1, 1, 0, 0.02, 0.001);
 [tc, yc] = rk38(@myode1, 1, 0, 0.02, 0.001);
 [td, yd] = heun(@myode1, 1, 0, 0.02, 0.001);
 [te, ye] = dormandprince(@myode1, 1, 0, 0.02, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode1, 1, 0, 0.02, 0.001, 1e-9);
+[tg, yg] = beuler(@myode1, 1, 0, 0.02, 0.001);
 
 figure
 hold on
@@ -338,19 +448,21 @@ plot(tc, yc, 'm')
 plot(td, yd, 'k')
 plot(te, ye, 'g')
 plot(tf, yf, 'c')
-legend('Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', 'RKF45', 'Location', 'Best');
+plot(tg, yg, 'y')
+legend('Forward Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', ...
+       'RKF45', 'Backward Euler', 'Location', 'Best');
 title('Stiff ODE, $\dot{y} = -1000y$', 'interpreter', 'latex');
 
-%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Test 2 REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-% Lorenz dynamics
+%% Test 2 : Lorenz dynamics
 disp('Running Test 2 ...')
 
-[ta, ya] = euler(@myode2, [1 1 1]', 0, 20, 0.001);
+[ta, ya] = feuler(@myode2, [1 1 1]', 0, 20, 0.001);
 [tb, yb] = rk4(@myode2, [1 1 1]', 0, 20, 0.001);
 [tc, yc] = rk38(@myode2, [1 1 1]', 0, 20, 0.001);
 [td, yd] = heun(@myode2, [1 1 1]', 0, 20, 0.001);
 [te, ye] = dormandprince(@myode2, [1 1 1], 0, 20, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode2, [1 1 1], 0, 20, 0.001,  1e-9);
+[tg, yg] = beuler(@myode2, [1 1 1]', 0, 20, 0.001);
 
 figure
 hold on
@@ -360,19 +472,21 @@ plot3(yc(1,:), yc(2,:), yc(3,:), 'm');
 plot3(yd(1,:), yd(2,:), yd(3,:), 'k');
 plot3(ye(1,:), ye(2,:), ye(3,:), 'g');
 plot3(yf(1,:), yf(2,:), yf(3,:), 'c');
-legend('Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', 'RKF45', 'Location', 'Best');
+plot3(yg(1,:), yg(2,:), yg(3,:), 'y');
+legend('Forward Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', ...
+       'RKF45', 'Backward Euler', 'Location', 'Best');
 title('Lorenz, $\sigma = 10, \beta = 8/3, \rho = 28$', 'interpreter', 'latex');
 
-%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Test 3 REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-% Van der Pol oscillator 
+%% Test 3 : Van der Pol oscillator 
 disp('Running Test 3 ...')
 
-[ta, ya] = euler(@myode3, [2 0]', 0, 1000, 0.001);
+[ta, ya] = feuler(@myode3, [2 0]', 0, 1000, 0.001);
 [tb, yb] = rk4(@myode3, [2 0]', 0, 1000, 0.001);
 [tc, yc] = rk38(@myode3, [2 0]', 0, 1000, 0.001);
 [td, yd] = heun(@myode3, [2 0]', 0, 1000, 0.001);
 [te, ye] = dormandprince(@myode3, [2 0]', 0, 1000, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode3, [2 0]', 0, 1000, 0.001,  1e-9);
+[tg, yg] = beuler(@myode3, [2 0]', 0, 1000, 0.001);
 
 figure
 hold on
@@ -382,19 +496,22 @@ plot(yc(1,:), yc(2,:), 'm');
 plot(yd(1,:), yd(2,:), 'k');
 plot(ye(1,:), ye(2,:), 'g');
 plot(yf(1,:), yf(2,:), 'c');
-legend('Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', 'RKF45', 'Location', 'Best');
+plot(yg(1,:), yg(2,:), 'y');
+legend('Forward Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', ...
+       'RKF45', 'Backward Euler', 'Location', 'Best');
 title('Van der Pol, $\mu = 100$', 'interpreter', 'latex');
 
-%% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Test 4 REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-% A simple sine wave
+%% Test 4 : A simple sine wave
 disp('Running Test 4 ...')
 
-[ta, ya] = euler(@myode4, -1, 0, 10, 0.001);
+[ta, ya] = feuler(@myode4, -1, 0, 10, 0.001);
 [tb, yb] = rk4(@myode4, -1, 0, 10, 0.001);
 [tc, yc] = rk38(@myode4, -1, 0, 10, 0.001);
 [td, yd] = heun(@myode4, -1, 0, 10, 0.001);
 [te, ye] = dormandprince(@myode4, -1, 0, 10, 0.001, 1e-9);
 [tf, yf] = rkf45(@myode4, -1, 0, 10, 0.001, 1e-9);
+[tg, yg] = beuler(@myode4, -1, 0, 10, 0.001);
+
 figure
 hold on
 plot(ta, ya, 'b');
@@ -403,17 +520,48 @@ plot(tc, yc, 'm');
 plot(td, yd, 'k');
 plot(te, ye, 'g');
 plot(tf, yf, 'c');
-legend('Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', 'RKF45', 'Location', 'Best');
+plot(tg, yg, 'y')
+legend('Forward Euler', 'RK4', 'RK3/8', 'Heun', 'Dormand-Prince', ...
+       'RKF45', 'Backward Euler', 'Location', 'Best');
 title('$\dot{y} = y * sin(t)$', 'interpreter', 'latex');
 
-%% ODEs to be solved
+%% Test 5 : A special test to campare Forward Euler and Backward Euler
+%  The test is taken from https://web.mit.edu/10.001/Web/Course_Notes/Differential_Equations_Notes/node3.html
+%
+%  Forward Euler becomes unstable  when $h>0.2$. Backward Euler is
+%  unconditionally stable.
 
-% A very stiff ODE
+disp('Running Test 5 ...')
+
+h = [0.2 0.1 0.05 0.01 0.001];
+
+figure
+hold on 
+for k = 1 : length(h)
+    [t, y] = feuler(@myode5, 1, 0, 3, h(k));
+    plot(t, y)    
+end
+legend(num2str(h), 'Location', 'best');
+title ('Forward Euler for $\dot{y} = -10y$', 'interpreter', 'latex')
+
+figure
+hold on 
+for k = 1 : length(h)
+    [t, y] = beuler(@myode5, 1, 0, 3, h(k));
+    plot(t, y)    
+end
+legend(num2str(h), 'Location', 'best');
+title ('Backward Euler for $\dot{y} = -10y$', 'interpreter', 'latex')
+
+
+%% Some ODES that we can use to test the solvers
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH A very stiff ODE REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
 function ydot = myode1(t,y)
 ydot = -1000*y;
 end
 
-% Lorenz dynamics
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Lorenz dynamics REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
 function ydot = myode2(t,y)
 sigma = 10;
 beta = 8/3;
@@ -423,25 +571,29 @@ ydot = [sigma * (y(2) - y(1));
     y(1) * y(2) - beta * y(3)];
 end
 
-% Van der Pol oscillator
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH Van der Pol oscillator REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
 function ydot = myode3(t,y)
 Mu = 100;
 ydot = [y(2); Mu*(1-y(1)^2)*y(2)-y(1)];
 end
 
-% A simple sine wave
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH A simple sine wave REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
 function ydot = myode4(t,y)
 ydot = y*sin(t);
 end
 
-%% Solver implementations
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH An ODE wih a decaying solution REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+function ydot = myode5(t,y)
+ydot = -10*y;
+end
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
 
-%% Euler method
-function [t, y] = euler(odefun, ...  % The ODE function
-                        y0, ...      % Initial states
-                        ts, ...      % Start time
-                        tf, ...      % End time
-                        h)           % Step time
+%% Forward Euler method
+function [t, y] = feuler(odefun, ...  % The ODE function
+                         y0, ...      % Initial states
+                         ts, ...      % Start time
+                         tf, ...      % End time
+                         h)           % Step time
 t = ts:h:tf;
 y = zeros(length(y0),length(t));
 y(:,1) = y0;
@@ -515,7 +667,8 @@ for k = 2 : length(t)
 end
 end
 
-%% Dormand-prince method, this is an adaptive method with variable time step.
+%% Dormand-prince method
+%  This is an adaptive method with variable time step
 function [t, y] = dormandprince(odefun, ...   % The ODE function
                                 y0, ...       % Initial states
                                 ts, ...       % Start time
@@ -533,12 +686,17 @@ while t < tf
     k2 = h * odefun(tn+h/5, yn+k1/5);
     k3 = h * odefun(tn+h*3/10, yn+k1*3/40 + k2*9/40);
     k4 = h * odefun(tn+h*4/5, yn + k1*44/45 - k2*56/15 + k3*32/9);
-    k5 = h * odefun(tn+h*8/9, yn + k1*19372/6561 - k2*25360/2187 + k3*64448/6561 - k4*212/729);
-    k6 = h * odefun(tn+h, yn + k1*9017/3168 - k2*355/33 + k3*46732/5247 + k4*49/176 - k5*5103/18656);
-    k7 = h * odefun(tn+h, yn + k1*35/384 + k3*500/1113 + k4*125/192 - k5*2187/6784 + k6*11/84);
+    k5 = h * odefun(tn+h*8/9, yn + k1*19372/6561 - k2*25360/2187 + ...
+                    k3*64448/6561 - k4*212/729);
+    k6 = h * odefun(tn+h, yn + k1*9017/3168 - k2*355/33 + ...
+                    k3*46732/5247 + k4*49/176 - k5*5103/18656);
+    k7 = h * odefun(tn+h, yn + k1*35/384 + k3*500/1113 + k4*125/192 - ...
+                    k5*2187/6784 + k6*11/84);
     
-    Y = yn + 35/384*k1 + 500/1113*k3 + 125/192*k4 - 2187/6784*k5 + 11/84*k6;
-    Z = yn + 5179/57600*k1 + 7571/16695*k3 + 393/640*k4 - 92097/339200*k5 + 187/2100*k6 + 1/40*k7;
+    Y = yn + 35/384*k1 + 500/1113*k3 + 125/192*k4 - 2187/6784*k5 + ...
+        11/84*k6;
+    Z = yn + 5179/57600*k1 + 7571/16695*k3 + 393/640*k4 - ...
+        92097/339200*k5 + 187/2100*k6 + 1/40*k7;
     
     E = norm(Y-Z); % local error estimation
     h = 0.9 * h * (TOL/E)^(1/5);   
@@ -549,7 +707,8 @@ while t < tf
 end
 end
 
-%% The Runge-Kutta-Fehlberg method (RKF45), this is an adaptive method with variable time step.
+%% The Runge-Kutta-Fehlberg method (RKF45)
+% This is an adaptive method with variable time step.
 function [t, y] = rkf45(odefun, ...   % The ODE function
                         y0, ...       % Initial states
                         ts, ...       % Start time
@@ -566,12 +725,16 @@ while t < tf
     k1 = h * odefun(tn, yn);
     k2 = h * odefun(tn+h/4, yn+k1/4);
     k3 = h * odefun(tn+h*3/8, yn+k1*3/32 + k2*9/32);
-    k4 = h * odefun(tn+h*12/13, yn + k1*1932/2197 - k2*7200/2197 + k3*7296/2197);
-    k5 = h * odefun(tn+h, yn + k1*439/216 - 8*k2 + k3*3680/513 - k4*845/4104);
-    k6 = h * odefun(tn+h/2, yn - k1*8/27 + k2*2 - k3*3544/2565 + k4*1859/4104 - k5*11/40);
+    k4 = h * odefun(tn+h*12/13, yn + k1*1932/2197 - k2*7200/2197 + ...
+                    k3*7296/2197);
+    k5 = h * odefun(tn+h, yn + k1*439/216 - 8*k2 + k3*3680/513 - ...
+                    k4*845/4104);
+    k6 = h * odefun(tn+h/2, yn - k1*8/27 + k2*2 - k3*3544/2565 + ...
+                    k4*1859/4104 - k5*11/40);
     
     Y = yn + 25/216*k1 + 1408/2565*k3 + 2197/4104*k4 - 1/5*k5;
-    Z = yn + 16/135*k1 + 6656/12825*k3 + 28561/56430*k4 - 9/50*k5 + 2/55*k6;   
+    Z = yn + 16/135*k1 + 6656/12825*k3 + 28561/56430*k4 - 9/50*k5 + ...
+        2/55*k6;   
     
     E = norm(Y-Z); % local error estimation    
     h = 0.9 * h * (TOL/E)^(1/5); 
@@ -581,5 +744,68 @@ while t < tf
     k = k + 1;
 end
 end
+
+
+%% The Backward-Euler method
+function [t, y] = beuler(odefun, ...  % The ODE function
+                         y0, ...      % Initial states
+                         ts, ...      % Start time
+                         tf, ...      % End time
+                         h)           % Step time
+
+t = ts:h:tf;
+y = zeros(length(y0),length(t));
+I = eye(length(y0));
+
+y(:,1) = y0;
+
+for k = 1 : length(t)-1
+    y1 = y(:,k);        
+    F = build_F(odefun, t(k), y(:,k), y1, h);
+    y2 = y1 - inv(I-h*Jacobian(odefun, t(k), y1)) * F; 
+
+    while (norm(y2-y1) > 0.0001)
+        y1 = y2;
+        F = build_F(odefun, t(k), y(:,k), y1, h);
+        y2 = y1 - inv(I-h*Jacobian(odefun, t(k), y1)) * F; 
+    end
+
+    y(:,k+1) = y2;
+end
+end
+
+% build the equation: F = 0
+function F = build_F(f, t, y1, y2, h)
+
+F = y2 - y1 - h*f(t, y2);
+
+end
+
+
+% Calculate Jacobian of function f at given x
+% Complex-Step Derivative Approximation (CSDA) Method
+function DF = Jacobian(f, t, x, epsilon)
+
+if nargin < 4
+    epsilon = 1e-5; 
+end
+
+epsilon_inv = 1/epsilon;
+
+nx = length(x); % Dimension of the input x;
+
+% Do perturbation
+for k = 1 : nx
+    xplus = x;
+    xplus(k) =  x(k) + 1i*epsilon;
+    DF(:, k) = imag(f(t, xplus))  .* epsilon_inv;
+end
+
+end
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH    
+
+
+
+
 ##### SOURCE END #####
 --></body></html>
